@@ -2,6 +2,12 @@
 
 A Python automation bot that scrapes gaming news from **GameRant** and publishes formatted updates to a Telegram channel.
 
+## Live Demo
+
+📢 **Telegram Channel:** https://t.me/GamediaNews_acn
+
+The Telegram channel is the live output of the automation pipeline.
+
 ## Pipeline
 
 ```text
@@ -68,7 +74,7 @@ BOT_TOKEN=<telegram-bot-token>
 CHANNEL_ID=<telegram-channel-or-chat-id>
 ```
 
-The source uses `os.environ.get("BOT_TOKEN")` and `os.environ.get("CHANNEL_ID")`, so the names above are the exact variable names expected by the application. fileciteturn68file0
+The source uses `os.environ.get("BOT_TOKEN")` and `os.environ.get("CHANNEL_ID")`, so the names above are the exact variable names expected by the application.
 
 **Never commit a real Telegram token to Git.**
 
@@ -82,7 +88,7 @@ Published article identifiers are stored in `posted.json`. This prevents repeate
 
 ## Image processing
 
-When an article image is available, the bot downloads the configured banner and composites it over the article image using Pillow. If image processing fails, the bot can fall back to a text-only Telegram message. fileciteturn68file0
+When an article image is available, the bot downloads the configured banner and composites it over the article image using Pillow. If image processing fails, the bot can fall back to a text-only Telegram message.
 
 ## Reliability
 
@@ -90,7 +96,7 @@ Transient Telegram failures are retried up to the configured retry count. The sc
 
 ## Scheduling
 
-The repository includes a GitHub Actions workflow and can also be run through a normal cron scheduler. fileciteturn67file2
+The repository includes a GitHub Actions workflow and can also be run through a normal cron scheduler.
 
 ## Limitations
 
