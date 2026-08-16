@@ -24,18 +24,18 @@ Telegram channel
 - HTML-formatted Telegram captions
 - Optional banner-composited images using Pillow
 - Duplicate prevention with local JSON state
-- Asia/Kolkata timezone-aware filtering
+- Asia/Kolkata timezone-aware date filtering
 - Async Telegram publishing
-- Retry handling for transient failures
+- Retry handling for transient Telegram failures
 - Text-only fallback when image publishing fails
-- Suitable for cron or GitHub Actions execution
+- GitHub Actions / cron-friendly execution
 
 ## Requirements
 
 - Python 3.9+
 - Telegram Bot Token
 - Telegram channel/group ID
-- Network access to the source website and Telegram API
+- Network access to GameRant and Telegram
 
 ## Installation
 
@@ -61,37 +61,44 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Configure the Telegram credentials using the mechanism expected by the source code. Keep secrets outside Git.
-
-Typical deployment values are:
+The bot reads these environment variables directly:
 
 ```text
 BOT_TOKEN=<telegram-bot-token>
 CHANNEL_ID=<telegram-channel-or-chat-id>
 ```
 
-Verify the exact variable names in the current code before running the bot.
+The source uses `os.environ.get("BOT_TOKEN")` and `os.environ.get("CHANNEL_ID")`, so the names above are the exact variable names expected by the application. fileciteturn68file0
+
+**Never commit a real Telegram token to Git.**
+
+For GitHub Actions, add the values as repository secrets and expose them to the workflow environment.
 
 ## Duplicate handling
 
-The bot stores previously published article information locally so repeated scheduled executions do not continuously republish the same content.
+Published article identifiers are stored in `posted.json`. This prevents repeated scheduled runs from continuously publishing the same articles.
 
-If the runtime uses an ephemeral filesystem, duplicate state may need to be moved to durable storage.
+`posted.json` is local runtime state, not a database. If the runtime filesystem is ephemeral, duplicate history will not survive a fresh environment unless the state is persisted separately.
+
+## Image processing
+
+When an article image is available, the bot downloads the configured banner and composites it over the article image using Pillow. If image processing fails, the bot can fall back to a text-only Telegram message. fileciteturn68file0
 
 ## Reliability
 
-Retry logic handles transient network and Telegram failures. If image generation or delivery fails, the bot can fall back to a text-only publication.
+Transient Telegram failures are retried up to the configured retry count. The scraper and publisher should still be treated as dependent on upstream website structure, network availability, and Telegram API behavior.
 
 ## Scheduling
 
-The application is designed to run as a scheduled job. GitHub Actions or a conventional cron scheduler can invoke it periodically.
+The repository includes a GitHub Actions workflow and can also be run through a normal cron scheduler. fileciteturn67file2
 
 ## Limitations
 
-- Scraping depends on GameRant's current HTML structure and availability.
-- Upstream markup changes can require parser updates.
-- Telegram imposes request and media limits.
-- Local JSON state is not a database and is not suitable for concurrent writers.
+- GameRant HTML changes can require scraper updates.
+- Upstream image URLs can expire or reject requests.
+- Telegram imposes API and media limits.
+- `posted.json` is not designed for concurrent writers.
+- A public scheduled bot should use appropriate GitHub Actions/resource limits.
 
 ## Content notice
 
