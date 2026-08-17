@@ -1,40 +1,40 @@
 # Gaming News Telegram Bot
 
-A Python automation bot that scrapes gaming news from **GameRant** and publishes formatted updates to a Telegram channel.
+A Python automation pipeline that collects recent gaming news from **GameRant**, filters and formats it, processes images, and publishes updates to Telegram.
 
-## Live Demo
+**Live output:** https://t.me/GamediaNews_acn
 
-📢 **Telegram Channel:** https://t.me/GamediaNews_acn
+> **Status:** Personal automation / research project. Upstream site structure and Telegram limits can change at any time.
 
-The Telegram channel is the live output of the automation pipeline.
-
-## Pipeline
+## What it does
 
 ```text
 GameRant
    ↓
-Scraper / parser
+Scrape + parse
    ↓
-Date + duplicate filtering
+Date filtering
+   ↓
+Duplicate protection
    ↓
 Image processing
    ↓
-Telegram formatter
+Telegram formatting
    ↓
-Telegram channel
+Publish
 ```
 
 ## Features
 
 - Fetches recent gaming news from GameRant
+- Filters articles by date and previously published IDs
 - HTML-formatted Telegram captions
-- Optional banner-composited images using Pillow
-- Duplicate prevention with local JSON state
-- Asia/Kolkata timezone-aware date filtering
+- Optional banner compositing with Pillow
 - Async Telegram publishing
 - Retry handling for transient Telegram failures
-- Text-only fallback when image publishing fails
+- Text-only fallback when image processing/publishing fails
 - GitHub Actions / cron-friendly execution
+- Asia/Kolkata timezone-aware filtering
 
 ## Requirements
 
@@ -43,7 +43,7 @@ Telegram channel
 - Telegram channel/group ID
 - Network access to GameRant and Telegram
 
-## Installation
+## Quick start
 
 ```bash
 git clone https://github.com/mohith-krishnaa/gamedianewsbot.git
@@ -51,60 +51,52 @@ cd gamedianewsbot
 python -m venv .venv
 ```
 
-### Windows
+Windows:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python <entrypoint>.py
 ```
 
-### Linux / macOS
+Linux/macOS:
 
 ```bash
 source .venv/bin/activate
 pip install -r requirements.txt
+python <entrypoint>.py
 ```
+
+Use the repository's current Python entrypoint when running locally; the scheduled workflow is the authoritative execution path for the deployed automation.
 
 ## Configuration
 
-The bot reads these environment variables directly:
+The application expects:
 
 ```text
 BOT_TOKEN=<telegram-bot-token>
 CHANNEL_ID=<telegram-channel-or-chat-id>
 ```
 
-The source uses `os.environ.get("BOT_TOKEN")` and `os.environ.get("CHANNEL_ID")`, so the names above are the exact variable names expected by the application.
+Never commit real credentials. For GitHub Actions, store them as repository secrets.
 
-**Never commit a real Telegram token to Git.**
+## State and scheduling
 
-For GitHub Actions, add the values as repository secrets and expose them to the workflow environment.
+`posted.json` contains runtime duplicate-tracking state. It is not a database and should not be treated as durable shared state for concurrent workers.
 
-## Duplicate handling
-
-Published article identifiers are stored in `posted.json`. This prevents repeated scheduled runs from continuously publishing the same articles.
-
-`posted.json` is local runtime state, not a database. If the runtime filesystem is ephemeral, duplicate history will not survive a fresh environment unless the state is persisted separately.
-
-## Image processing
-
-When an article image is available, the bot downloads the configured banner and composites it over the article image using Pillow. If image processing fails, the bot can fall back to a text-only Telegram message.
+The repository supports scheduled execution through GitHub Actions as well as normal cron-style execution.
 
 ## Reliability
 
-Transient Telegram failures are retried up to the configured retry count. The scraper and publisher should still be treated as dependent on upstream website structure, network availability, and Telegram API behavior.
-
-## Scheduling
-
-The repository includes a GitHub Actions workflow and can also be run through a normal cron scheduler.
+The bot depends on three external systems: GameRant's current HTML structure, network availability, and the Telegram API. Retries handle transient failures, but they cannot compensate for permanent upstream changes.
 
 ## Limitations
 
-- GameRant HTML changes can require scraper updates.
-- Upstream image URLs can expire or reject requests.
-- Telegram imposes API and media limits.
-- `posted.json` is not designed for concurrent writers.
-- A public scheduled bot should use appropriate GitHub Actions/resource limits.
+- GameRant HTML changes may require scraper maintenance.
+- Upstream image URLs can expire or reject automated requests.
+- Telegram API limits apply to messages and media.
+- Local JSON state is unsuitable for concurrent writers or multi-instance deployments.
+- Scheduled automation consumes GitHub Actions minutes and should be kept appropriately scoped.
 
 ## Content notice
 
@@ -112,7 +104,7 @@ GameRant articles, images and other third-party content remain subject to their 
 
 ## License
 
-See the repository license for the applicable terms.
+See `LICENSE` for the applicable source-code license.
 
 ## Author
 
