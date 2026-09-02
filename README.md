@@ -84,7 +84,7 @@ Never commit real credentials. For GitHub Actions, store them as repository secr
 
 `posted.json` contains runtime duplicate-tracking state. It is not a database and should not be treated as durable shared state for concurrent workers.
 
-The repository supports scheduled execution through GitHub Actions as well as normal cron-style execution.
+The repository supports scheduled execution through GitHub Actions as well as normal cron-style execution. The workflow uses the scoped built-in `GITHUB_TOKEN` with `contents: write` permission to persist `posted.json`; it does not require a separate `GH_PAT` secret.
 
 ## Reliability
 
@@ -97,6 +97,7 @@ The bot depends on three external systems: GameRant's current HTML structure, ne
 - Telegram API limits apply to messages and media.
 - Local JSON state is unsuitable for concurrent writers or multi-instance deployments.
 - Scheduled automation consumes GitHub Actions minutes and should be kept appropriately scoped.
+- The workflow still requires `BOT_TOKEN` and `CHANNEL_ID` repository secrets; never place either credential in source control.
 
 ## Content notice
 
